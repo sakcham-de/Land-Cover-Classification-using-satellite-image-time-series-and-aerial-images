@@ -1,0 +1,88 @@
+data:
+    path_aerial_train: "/bigwork/nhgnps02/flair_main_data/flair_2_aerial_train/" # ./flair_aerial_train/
+    path_sen_train: "/bigwork/nhgnps02/flair_main_data/flair_2_sen_train/"  # ./flair_sen_train/
+    path_labels_train: "/bigwork/nhgnps02/flair_main_data/flair_2_labels_train/" # ./flair_labels_train/
+ 
+    path_aerial_test: "/bigwork/nhgnps02/flair_main_data/flair_2_aerial_test/" # ./flair_aerial_test/
+    path_sen_test: "/bigwork/nhgnps02/flair_main_data/flair_2_sen_test/" # ./flair_sen_test/
+    path_labels_test: "/bigwork/nhgnps02/flair_main_data/flair_2_labels_test/" # ./flair_labels_test/
+
+    path_sp_centroids: "/bigwork/nhgnps02/flair_main_data/flair-2_centroids_sp_to_patch.json" # ./flair_centroids_sp_to_patch.json
+    path_metadata_aerial: "/bigwork/nhgnps02/flair_main_data/flair-2_aerial_metadata.json" # ./flair_aerial_metadata.json
+
+outputs:
+    out_folder: "/bigwork/nhgnps02/model_outputs/" # add a path to where your parameters should be saved
+    out_model_name: "baseline_model"
+
+
+# Fusion
+sat_patch_size: 40 # in [8,112] and multiple of 8 
+w_unet_utae: [1,1]
+drop_utae_modality: 0.0 # 1 = dropping U-TAE branch
+
+# MTD and AUG
+aerial_metadata: False
+geo_enc_size: 32
+use_augmentation: True
+
+# Sentinel Time Series filtering
+filter_clouds: True
+average_month: True
+
+# Weighting
+weights_aerial_satellite:
+                         building               : [1,1]
+                         pervious surface       : [1,1]
+                         impervious surface     : [1,1]
+                         bare soil              : [1,1]
+                         water                  : [1,1]
+                         coniferous             : [1,1]
+                         deciduous              : [1,1]
+                         brushwood              : [1,1]
+                         vineyard               : [1,1]
+                         herbaceous vegetation  : [1,1]
+                         agricutural land       : [1,1]
+                         plowed land            : [1,0]
+                         other                  : [0,0]
+
+# Inputs
+num_classes: 13
+num_channels_aerial: 5 
+num_channels_sat: 10 
+# Training
+num_epochs: 100
+batch_size: 4
+batch_size_inference: 1
+lr: 0.001
+
+# Computation
+num_workers: 1
+accelerator: gpu # or cpu
+gpus_per_node: 1
+num_nodes: 1
+strategy: auto # ddp if multi-gpu
+
+# UTAE Model
+encoder_widths: [64,64,128,128] # 1st and last must be equivalent to decoder_widths
+decoder_widths: [64,64,128,128] # 1st and last must be equivalent to encoder_widths
+out_conv: [32, 13]
+str_conv_k: 4
+str_conv_s: 2
+str_conv_p: 1
+agg_mode: att_group
+encoder_norm: group
+n_head: 16
+d_model: 256
+d_k: 4
+ref_year: 2021 # defined for whole dataset
+ref_date: 05-15 # defined for whole dataset
+pad_value: 0
+padding_mode: reflect
+
+#Tracking
+enable_progress_bar: True
+progress_rate: 10
+
+resume: True
+
+# ValueError: You selected an invalid strategy name: `strategy=None`. It must be either a string or an instance of `pytorch_lightning.strategies.Strategy`. Example choices: auto, ddp, ddp_spawn, deepspeed, ... Find a complete list of options in our documentation at https://lightning.ai
